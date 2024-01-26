@@ -20,7 +20,7 @@ Function Test-DockerInPath() {
 
 Function Get-GuacSQL ($Version) {
 
-    $TemplateFilename   = "guacamole-initdb-DB-vVER.sql"
+    $TemplateFilename   = "guacamole-initdb-DB-vVER.sql.txt"
     $MySQLPath      = "mysql\"+$TemplateFilename.Replace("DB","mysql").Replace("VER",$Version)
     $PostgresPath   = "postgres\"+$TemplateFilename.Replace("DB","postgres").Replace("VER",$Version)
 
@@ -31,13 +31,20 @@ Function Get-GuacSQL ($Version) {
 
         # Collect Guacamole Client, generate SQL using built in script
         (docker pull guacamole/guacamole:$Version) *> $null
-        (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --postgresql | Set-Content -Path $MySQLPath) *> $null
-        (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --mysql | Set-Content -Path $PostgresPath) *> $null
+
+        If ($Version -lt "1.5.2") {
+            (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --postgres | Set-Content -Path $PostgresPath)
+        } Else {
+            (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --postgresql | Set-Content -Path $PostgresPath) 
+        }
+
+        (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --mysql | Set-Content -Path $MySQLPath) 
 
         If (Test-Path $MySQLPath) {
             Write-Host "OK: " -NoNewline -ForegroundColor Green
             Write-Host "MySQL :)" -ForegroundColor White
             (Get-FileHash -Path $MySQLPath -Algorithm SHA256).Hash | Set-Content -Path "$MySQLPath.sha256"
+            Write-Host $MySQLPath, (Get-FileHash -Path $MySQLPath -Algorithm SHA256).Hash -ForegroundColor DarkCyan
             # Create the 'latest' file
             If ($Version -eq $Latest) {
                 Write-Host "-- Latest Version" -ForegroundColor Cyan
