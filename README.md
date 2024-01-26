@@ -20,13 +20,16 @@ https://raw.githubusercontent.com/daemonchild/guacamole-initial-sql/main/postgre
 Assuming you set up your postgres container like this:
 
 ```
-docker run -d --restart=always --name postgres -p 5432:5432 -v postgres-data:/var/lib/postgresql/data -e POSTGRES_DB="guacamole_db" -e POSTGRES_PASSWORD="blahblahblah" postgres:latest`
+docker run -d --restart=always --name postgres -p 5432:5432 \
+     -v postgres-data:/var/lib/postgresql/data \
+     -e POSTGRES_DB="guacamole_db" -e POSTGRES_PASSWORD="blahblahblah" \
+     postgres:latest
 ```
 
 You could use it like this:
 
 ```
-curl [Latest URL] | docker exec -i postgres psql --username=postgres guacamole_db`
+curl [Latest URL] | docker exec -i postgres psql --username=postgres guacamole_db
 ```
 
 Note: I've used this technique to inject prebuilt data into Guacamole for automated deployments. For reference, this is the SQL needed to set up the remote Guacamole user.
