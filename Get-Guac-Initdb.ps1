@@ -27,21 +27,23 @@ Function Get-GuacSQL ($Version) {
     If (Test-DockerInPath) {
         
         Write-Host "Working: " -NoNewline -ForegroundColor Blue
-        Write-Host "fetching $Version docker image" -ForegroundColor Yellow
+        Write-Host "Fetching $Version docker image. Wait." -ForegroundColor Yellow
 
         # Collect Guacamole Client, generate SQL using built in script
         (docker pull guacamole/guacamole:$Version) *> $null
         (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --postgresql | Set-Content -Path $MySQLPath) *> $null
         (docker run --rm guacamole/guacamole:$Version /opt/guacamole/bin/initdb.sh --mysql | Set-Content -Path $PostgresPath) *> $null
 
-
         If (Test-Path $MySQLPath) {
             Write-Host "OK: " -NoNewline -ForegroundColor Green
             Write-Host "MySQL :)" -ForegroundColor White
+            (Get-FileHash -Path $MySQLPath -Algorithm SHA256).Hash | Set-Content -Path "$MySQLPath.sha256"
             # Create the 'latest' file
             If ($Version -eq $Latest) {
                 Write-Host "-- Latest Version" -ForegroundColor Cyan
-                Copy-Item $MySQLPath $MySQLPath.Replace("v$Version", "latest")
+                $LatestMySQLPath = $MySQLPath.Replace("v$Version", "latest")
+                Copy-Item $MySQLPath $LatestMySQLPath
+                (Get-FileHash -Path $LatestMySQLPath -Algorithm SHA256).Hash | Set-Content -Path "$LatestMySQLPath.sha256"
             }
 
         } Else {
@@ -52,10 +54,13 @@ Function Get-GuacSQL ($Version) {
         If (Test-Path $PostgresPath) {
             Write-Host "OK: " -NoNewline -ForegroundColor Green
             Write-Host "Postgres :)" -ForegroundColor White
+            (Get-FileHash -Path $PostgresPath -Algorithm SHA256).Hash | Set-Content -Path "$PostgresPath.sha256"
             # Create the 'latest' file
             If ($Version -eq $Latest) {
+                $LatestPostgresPath = $PostgresPath.Replace("v$Version", "latest")
                 Write-Host "-- Latest Version" -ForegroundColor Cyan
-                Copy-Item $PostgresPath $PostgresPath.Replace("v$Version", "latest")
+                Copy-Item $PostgresPath $LatestPostgresPath
+                (Get-FileHash -Path $LatestMySQLPath -Algorithm SHA256).Hash | Set-Content -Path "$LatestPostgresPath.sha256"
             }
         } Else {
             Write-Host "FAIL: " -NoNewline -ForegroundColor Green
