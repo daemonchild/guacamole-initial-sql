@@ -55,7 +55,7 @@ Function Get-GuacSQL ($Version) {
             # Create the 'latest' file
             If ($Version -eq $Latest) {
                 Write-Host "-- Latest Version" -ForegroundColor Cyan
-                Copy-Item $PostgresPath $PostgresPath.Replace($Version, "latest")
+                Copy-Item $PostgresPath $PostgresPath.Replace("v$Version", "latest")
             }
         } Else {
             Write-Host "FAIL: " -NoNewline -ForegroundColor Green
