@@ -83,6 +83,8 @@ Function Get-GuacSQLAll ($Versions) {
     Foreach ($Version in $Versions) {
         Get-GuacSQL -Version $Version
     }
+
+    "Last Generated: " + (Get-Date) | Set-Content -Path Files-Last-Generated.txt
 }
 
 
