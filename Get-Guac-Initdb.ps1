@@ -40,7 +40,8 @@ Function Get-GuacSQL ($Version) {
             Write-Host "MySQL :)" -ForegroundColor White
             # Create the 'latest' file
             If ($Version -eq $Latest) {
-                Copy-Item $MySQLPath $MySQLPath.Replace($Version, "latest")
+                Write-Host "-- Latest Version" -ForegroundColor Cyan
+                Copy-Item $MySQLPath $MySQLPath.Replace("v$Version", "latest")
             }
 
         } Else {
@@ -53,6 +54,7 @@ Function Get-GuacSQL ($Version) {
             Write-Host "Postgres :)" -ForegroundColor White
             # Create the 'latest' file
             If ($Version -eq $Latest) {
+                Write-Host "-- Latest Version" -ForegroundColor Cyan
                 Copy-Item $PostgresPath $PostgresPath.Replace($Version, "latest")
             }
         } Else {
